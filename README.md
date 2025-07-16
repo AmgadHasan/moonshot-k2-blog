@@ -56,7 +56,7 @@ A freer router also enlarges the combinatorial space → better model quality.
 
 ## 2. Architecture Details:
 1. Sparse Mixture of Expert (SMoE)
-2. 1000-A32: 1 trilion total tokens, 32 of which are activated in each forward pass
+2. 1000-A32: 1 trilion total parameters, 32 of which are activated in each forward pass
 3. Very similar to Deepseek V3 & R1
 4. Has less attention heads but more total experts
 5. Bigger vocab
