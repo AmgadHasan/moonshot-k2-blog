@@ -124,6 +124,20 @@ They developed a comprehensive pipeline inspired by ACEBench. It simulates real-
 <img width="2482" height="770" alt="workflow-Cqznd7Jl" src="https://github.com/user-attachments/assets/ba8a6071-3d19-4dfc-9a21-805f7de755da" />
 
 
+### 3. General Reinforcement Learning
+We already have RL for verifiable tasks (DeepSeek R1).
+The key challenge is to apply RL to tasks with both verifiable and non-verifiable rewards.
+Typical examples of verifiable tasks are math and competition coding, while writing a research report is usually viewed as non-verifiable
+
+They created a general RL system uses a self-judging mechanism: the model acts as its own critic, providing scalable, rubric-based feedback for non-verifiable tasks.
+
+They use on-policy rollouts with verifiable rewards to continuously update the critic.
+This makes sure the critic keeps improving its evaluation accuracy on the latest policy. 
+This can be viewed as a way of using verifiable rewards to improve the estimation of non-verifiable rewards.
+
+
+
+
 # Trivias
 Xai [rejected](https://xcancel.com/kellerjordan0/status/1893868235381961140) the idea behind moun and said this is wrong.
 
