@@ -60,7 +60,7 @@ A freer router also enlarges the combinatorial space → better model quality.
 3. Very similar to Deepseek V3 & R1
 4. Has less attention heads but more total experts
 5. Bigger vocab
-<img width="680" height="356" alt="image" src="https://github.com/user-attachments/assets/13174d0d-d3d2-4890-803b-92fbc35c3891" />
+<img width="680" height="356" alt="image" src="https://pbs.twimg.com/media/Gvqs56pXIAEVI73.jpg?name=orig" />
 
 
 # Motivation & Prinicples
@@ -109,6 +109,20 @@ Kimi K2 (1T-32A) was pre-trained on 15.5T tokens using MuonClip with **zero trai
 
 Notice also the second loss dip at ~11T tokens!
 <img width="1919" height="1152" alt="image" src="https://github.com/user-attachments/assets/379114e3-cbb2-456a-9087-91bd98f85eb3" />
+
+### 2. Large-scale agentic data synthesis
+How to teach the model sophisticated tool-use capabilities? 
+They developed a comprehensive pipeline inspired by ACEBench. It simulates real-world tool-using scenarios at scale. 
+
+1. Systematically evolve hundreds of domains with thousands of tools (real MCP and synthetic).
+2. Generate hundreds of agents with diverse tool sets.
+3. Create simulated environments and user agents (i.e agents that act as a user)
+4. Use rubric-based tasks for consistent evaluation.
+5. Simulate multi-turn tool-use scenarios with agents interacting in environments and with user agents.
+6. Employ an LLM judge to evaluate results against task rubrics, filtering for high-quality training data.
+
+<img width="2482" height="770" alt="workflow-Cqznd7Jl" src="https://github.com/user-attachments/assets/ba8a6071-3d19-4dfc-9a21-805f7de755da" />
+
 
 # Trivias
 Xai [rejected](https://xcancel.com/kellerjordan0/status/1893868235381961140) the idea behind moun and said this is wrong.
