@@ -4,8 +4,8 @@ Moonshot said the technical report is "coming soon".
 AI labs don't have a good track record of keeping promises, so I'll make use of what knowledge is available for now instead of waiting for an unspecified (and potentially infinite) amount.
 If they do release a detailed technical report, it might be a good chance to flesh this repo even more.
 
-## Architecture
-### 1. Design Principles
+# Architecture
+## 1. Design Principles
 #### (aka how to design a modern LLM arch.)
 Before training even started, they ran a mountain of scaling-law experiments on architecture variants.
 Every single variant that differed from DeepSeek V3 failed to beat it — at best they tied.
@@ -21,7 +21,40 @@ Hence the design task boiled down to:
 
 **Within the DSv3 skeleton, find parameters that keep train/inference cost flat while pushing loss significantly lower.**
 
-### 2. Architecture Details:
+## Changes
+
+### 1. Sparsity scaling law
+"With fixed activated params, simply increasing total MoE params still obeys the scaling law—no overfitting observed" (internal research by Moonshot pre-training team)
+
+Action: Increase number of total experts to `384`
+
+Downside: Model is now bigger. If we use split the model across `256` nodes it now needs +2.5 GB per node.
+| Model | EP rank load        | MLP weight |
+| ----- | ------------------- | ---------- |
+| DSv3  | 2 routed + 1 shared | ~7.5 GB    |
+| K2    | 3 routed + 1 shared | ~10 GB     |
+
+### 2. Less attention heads
+MoE just got 50 % more expensive—can we claw it back elsewhere?
+DeepSeek doubled heads vs classic MHA to maximize bandwidth utilization, but that hurt latency in both prefill & decode.
+
+Action: Reduce the number of attention heads to `64`.
+
+Result: 
+1. Cutting heads halves the quadratic term—huge win for long sequences (k2's bread & butter: agents, vibe coding).
+2. QKVO projection params drop from 10 B → 5 B, shaving FLOPs again.
+
+Ablation showed the negative impact on loss is tiny compared to MoE’s gain. Heads=64 locked in.
+
+### 3. No expert grouping
+Grouping helps when multiple experts sit on one GPU, balancing work at device level.
+At our scale we must use large EP, so each device holds ≤1 expert.
+Balancing moves to the node level, yet worst-case imbalance inside a node still kills latency.
+Thus dynamic expert re-allocation + redundancy (EPLB) outweigh grouping.
+A freer router also enlarges the combinatorial space → better model quality.
+
+
+## 2. Architecture Details:
 1. Sparse Mixture of Expert (SMoE)
 2. 1000-A32: 1 trilion total tokens, 32 of which are activated in each forward pass
 3. Very similar to Deepseek V3 & R1
@@ -30,8 +63,8 @@ Hence the design task boiled down to:
 <img width="680" height="356" alt="image" src="https://github.com/user-attachments/assets/13174d0d-d3d2-4890-803b-92fbc35c3891" />
 
 
-## Motivation & Prinicples
-### 1. Agentic Intelligence
+# Motivation & Prinicples
+## 1. Agentic Intelligence
 
 In RL, there are three key components: algorithm, environment, and priors.
 Without good priors, the agent is just randomly guessing the action it takes. This results in low rewards overall and very weak feedback signal.
@@ -40,13 +73,13 @@ LLM Pre-training is the crucial foundation for establishing the priors that make
 Caveat: "human data is a finite "fossil fuel" and its growth is lagging far behind the pace of compute.
 Token efficiency is important: given a fixed sized dataset, how can we develop "smarter" models? (hints: use better optimizer like muonclip)
 
-### 2.  Post-training
+## 2.  Post-training
 We're in the "Era of Experience" (David Silver, Richard Sutton, 2025): LLMs increasingly learn from their own self-generated interactions, receiving rewards that free them from the limits of human data and enable them to surpass human capabilities. Authors believe this unlocks superhuman intelligence as we aren't bottlenecked by our mere human brains.
 Examples:
 1. AlphaProof: Inititially trained on ~100k formal proofs by human experts -> generate ~100M more through continual interaction with a formal proving system. 
 2. Deepseek R1: Use verifiable problems with RL to let the model learn from its attempted solutions.
 
-## Solutions
+# Contributions
 ### 1. MuonClip Optimizer
 For a finite/fixed pretraining dataset and a fixed model configuration, a more token-efficient optimizer generates more intelligence.
 There has been non-stop research to improve upon AdamW since 2015-ish.
