@@ -1,5 +1,34 @@
 # moonshot-k2-blog
-My recap of Moonshot AI's blog post about the Kimi-K2 LLM
+My recap of Moonshot AI's blog post about the Kimi-K2 LLM.
+Moonshot said the technical report is "coming soon".
+AI labs don't have a good track record of keeping promises, so I'll make use of what knowledge is available for now instead of waiting for an unspecified (and potentially infinite) amount.
+If they do release a detailed technical report, it might be a good chance to flesh this repo even more.
+
+## Architecture
+### 1. Design Principles
+#### (aka how to design a modern LLM arch.)
+Before training even started, they ran a mountain of scaling-law experiments on architecture variants.
+Every single variant that differed from DeepSeek V3 failed to beat it — at best they tied.
+
+So the question became: “Should we pick an inferior but different architecture just to be different?”
+The answer was no. DSv3’s structure is battle-tested at scale; their “new ideas” weren’t
+With two huge variables already in play (Muon optimizer + larger param count), we didn’t want to add an unverified third variable.
+
+Constraint #1: Inherit DSv3’s architecture wholesale, then tune only the structural hyper-params.
+Constraint #2: Cost ceiling. DSv3 is at the upper limit of what they can afford; K2 must be similar. 
+
+Hence the design task boiled down to:
+
+**Within the DSv3 skeleton, find parameters that keep train/inference cost flat while pushing loss significantly lower.**
+
+### 2. Architecture Details:
+1. Sparse Mixture of Expert (SMoE)
+2. 1000-A32: 1 trilion total tokens, 32 of which are activated in each forward pass
+3. Very similar to Deepseek V3 & R1
+4. Has less attention heads but more total experts
+5. Bigger vocab
+<img width="680" height="356" alt="image" src="https://github.com/user-attachments/assets/13174d0d-d3d2-4890-803b-92fbc35c3891" />
+
 
 ## Motivation & Prinicples
 ### 1. Agentic Intelligence
@@ -57,3 +86,5 @@ How to short xAI?
 
 # References
 1. [Kimi K2 Blog post](https://moonshotai.github.io/Kimi-K2/)
+2. [Sebastian Raschka's tweet](https://xcancel.com/rasbt/status/1944056316424577525)
+3. English [translation](https://www.kimi.com/share/d1q8l75e09n7its6e7jg) of Moonshot engineer Shaowei Liu's [writing](https://www.zhihu.com/question/1927140506573435010/answer/1927892108636849910) 
